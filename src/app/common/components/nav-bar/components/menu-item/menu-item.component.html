@@ -1,0 +1,50 @@
+@if (item.items && item.items.length > 0) {
+  <div class="dropdown-container relative" #dropdownContainer>
+    <button type="button" [class]="buttonClasses" (click)="onToggleSubmenu($event)" [attr.aria-expanded]="isDropdownOpen" [attr.aria-haspopup]="true">
+      @if (item.icon) {
+        <i [class]="item.icon + ' mr-2'" aria-hidden="true"></i>
+      }
+      <span class="mr-2">{{ item.label }}</span>
+      <i class="pi text-xs transition-transform duration-200" [ngClass]="chevronClasses" aria-hidden="true"></i>
+    </button>
+
+    @if (isDropdownOpen || (isMobile && isExpandedMobile)) {
+      <nav [class]="submenuClasses" role="menu" [attr.aria-label]="'Submenu for ' + item.label" #submenuContainer>
+        @for (subItem of item.items; track subItem.label) {
+          <a [routerLink]="subItem.routerLink" [class]="submenuItemClasses" (click)="onSubmenuClick()" role="menuitem">
+            @if (subItem.icon) {
+              <i [class]="subItem.icon + ' mr-2'" aria-hidden="true"></i>
+            }
+            <span>{{ subItem.label }}</span>
+          </a>
+        }
+      </nav>
+    }
+  </div>
+} @else {
+  @if (item.command) {
+    <button
+      type="button"
+      [ngClass]="{ 'bg-mainButton': isMainButton }"
+      [class]="simpleItemClasses"
+      (click)="onItemClick()"
+      role="menuitem">
+      @if (item.icon) {
+        <i [class]="item.icon + ' mr-2'" aria-hidden="true"></i>
+      }
+      <span>{{ item.label }}</span>
+    </button>
+  } @else {
+    <a
+      [routerLink]="item.routerLink"
+      [ngClass]="{ 'bg-mainButton text-white': isMainButton }"
+      [class]="simpleItemClasses"
+      (click)="onItemClick()"
+      role="menuitem">
+      @if (item.icon) {
+        <i [class]="item.icon + ' mr-2'" aria-hidden="true"></i>
+      }
+      <span>{{ item.label }}</span>
+    </a>
+  }
+}

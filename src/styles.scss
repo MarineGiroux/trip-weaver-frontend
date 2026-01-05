@@ -20,26 +20,31 @@ $bg-color-red: #ff0000;
   font-family: 'Noto Sans Georgian', sans-serif;
   padding: 0;
   margin: 0;
+  --color-text: #000000;
+  --color-text-title: #04acb0;
+  --color-footer: rgba(17, 201, 214, 0.1);
+  --color-footer-text: #04acb0;
+  --color-icone-footer: #04acb0;
+  --color-navbar-text: #04acb0;
+  --color-navbar-text-connexion: #ffffff;
+  --color-navbar: #ffffff;
+
+
   --color-background: #ffffff;
   --color-transport-background: #ffffff;
   --color-background-input: #fdfdfd;
   --color-border-input: #dddddd;
-  --color-text: #000000;
   --color-text-multiselect: #000000;
   --color-text-input: #2e2e2e;
-  --color-main-button: #0659a7;
+  --color-main-button: #05a9b0;
   --color-background-polygon: #eaf5fb;
-  --color-text-title: #0659a7;
   --color-text-popup: rgba(74, 134, 191, 0.78);
   --color-text-inscription: #0b6dc6;
   --color-handle: #ffffff;
-  --color-checked-background: #0659a7;
+  --color-checked-background: #²;
   --color-hover-background: #5c87c1;
   --color-disabled-background: #ddd;
   --color-disabled-handle: #aaa;
-  --color-footer: #e8eff7;
-  --color-footer-text: #18518b;
-  --color-icone-footer: #0659a7;
   --header-modal: rgba(167, 201, 232, 0.25);
   --bg-cancel-button-modal: #087dea;
   --border-cancel-button-modal: #009dff;
@@ -50,11 +55,8 @@ $bg-color-red: #ff0000;
   --sky-blue-button: #badeff;
   --cross-cancel: rgb(245, 255, 255);
   --red-button: rgba(241, 149, 149, 0.25);
-  --color-navbar-text: #0659a7;
   --color-label-text: #054d93;
-  --color-navbar-text-connexion: #ffffff;
-  --color-navbar: #ffffff;
-  --color-main-button-rgb: rgba(6, 89, 167);
+  --color-main-button-rgb: rgb(2, 124, 131);
   --bg-modal-red: rgba(239, 203, 203, 0.25);
   --bg-opacity-border-red: rgba(234, 8, 8, 0.25);
   --border-color-red: #ff1e00;
@@ -65,38 +67,40 @@ $bg-color-red: #ff0000;
 }
 
 .dark {
+  --color-text: #c1f1f3;
+  --color-text-title: #26d4d8;
+  --color-footer: rgba(213, 251, 253, 0.15);
+  --color-footer-text: rgb(4, 172, 176);
+  --color-icone-footer: rgb(4, 172, 176);
+  --color-navbar-text-connexion: #26d4d8;
+  --color-navbar-text: #26d4d8;
+  --color-navbar: #777474;
+
+
   --color-background: #0a1a2f;
-  --color-background-input: #fdfdfd;
-  --color-border-input: #f1f5f9;
-  --color-text: #d0efff;
-  --color-text-input: #2e2e2eff;
-  --color-main-button: #0659a7;
+  --color-background-input: #ac2525;
+  --color-border-input: #537faa;
+    --color-text-input: #2e2e2eff;
+  --color-main-button: #05a9b0;
   --color-background-polygon: #0f2541;
-  --color-text-title: #d0efff;
-  --color-handle: #ffffff;
-  --color-text-multiselect: #ffffff;
+  --color-handle: #a535bf;
+  --color-text-multiselect: #da3131;
   --color-text-popup: #d0efff;
   --color-text-inscription: #59adfb;
-  --color-checked-background: #0659a7;
+  --color-checked-background: #05a9b0;
   --color-hover-background: #4c78a7;
   --color-disabled-background: #444;
   --color-disabled-handle: #aaa;
-  --color-footer: #31495e;
   --color-transport-background: #132f55;
-  --color-footer-text: #d0efff;
-  --color-icone-footer: #e8eff7;
   --header-modal: #0f2541;
   --bg-cancel-button-modal: #087dea;
   --sky-blue-button: #badeff;
   --cross-cancel: #1c4071;
   --bg-delete-button-modal: #ff0000;
-  --color-text-delete-button: #ffffff;
+  --color-text-delete-button: #e42f2f;
   --red-button: rgba(234, 8, 8, 0.4);
-  --color-navbar-text: #ffffff;
   --color-label-text: #badeff;
-  --color-navbar-text-connexion: #0659a7;
-  --color-navbar: #777474;
-  --color-main-button-rgb: rgba(6, 89, 167);
+  --color-main-button-rgb: rgb(2, 124, 131);
   --bg-modal-red: rgba(244, 1, 1, 0.87);
   --bg-opacity-border-red: rgba(234, 8, 8, 0.4);
   --border-color-red: #ff4444;
@@ -535,7 +539,7 @@ p-table .p-checkbox input {
       box-shadow: 0 2px 8px rgba(var(--color-main-button-rgb), 0.3);
 
       &:hover {
-        background-color: #0173dc;
+        background-color: #027c83;
       }
 
       &::after {
@@ -613,10 +617,10 @@ p-table .p-checkbox input {
     }
 
     .dark & {
-      color: white;
+      color: rgb(61, 231, 236);
 
       &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(17, 201, 214, 0.5);
       }
     }
   }
@@ -649,7 +653,7 @@ p-table .p-checkbox input {
       opacity: 0;
 
       .dark & {
-        background-color: white;
+        background-color: rgba(17, 201, 214, 0.5);
       }
     }
 
@@ -675,7 +679,7 @@ p-table .p-checkbox input {
       }
 
       &:hover {
-        background-color: #0173dc !important;
+        background-color: #027c83 !important;
       }
 
       &::after {

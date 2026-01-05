@@ -1,0 +1,12 @@
+.red-button {
+  background-color: var(--red-button);
+  transition: background-color 0.3s ease-in-out;
+  color: var(--color-text-delete-button);
+  align-items: center;
+  border-radius: 5px;
+}
+
+.red-button:hover {
+  background-color: #aa1e1e;
+  color: white;
+}

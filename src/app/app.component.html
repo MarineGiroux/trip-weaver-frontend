@@ -1,0 +1,17 @@
+<div class="bg-backGround min-h-screen flex flex-col">
+  @if (showNavbar) {
+    <header class="fixed top-0 left-0 right-0 z-50 h-16">
+      <app-nav-bar></app-nav-bar>
+    </header>
+  }
+
+  <main class="flex-grow pt-16">
+    <router-outlet></router-outlet>
+  </main>
+
+  @if (showNavbar) {
+    <footer>
+      <app-footer></app-footer>
+    </footer>
+  }
+</div>

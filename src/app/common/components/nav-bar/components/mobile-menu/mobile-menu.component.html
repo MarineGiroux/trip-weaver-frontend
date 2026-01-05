@@ -1,0 +1,11 @@
+<nav class="mobile-menu" role="navigation" aria-label="Mobile navigation menu">
+  <div class="mobile-menu-items p-4 space-y-2">
+    @if (isAuthenticated()) {
+      <app-user-info [userInfo]="getCurrentUserInfo()" />
+    }
+
+    @for (item of menuItems; track item.label) {
+      <app-menu-item [item]="item" [isMobile]="true" (itemClick)="onItemClick()" (submenuToggle)="onSubmenuToggle($event)" />
+    }
+  </div>
+</nav>

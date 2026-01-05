@@ -1,0 +1,5 @@
+<nav class="nav-links flex items-center space-x-1" role="navigation" aria-label="Main navigation">
+  @for (item of menuItems; track item.label) {
+    <app-menu-item [item]="item" [isMobile]="false" (itemClick)="onItemClick()" (submenuToggle)="onDropdownToggle($event)" />
+  }
+</nav>

@@ -1,0 +1,63 @@
+<form class="text-text container max-w-6xl mt-3 xl:ml-16" [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+  <div class="sm:px-6 px-4 mt-1">
+    <h2 class="font-semibold text-3xl">Inscrivez-vous</h2>
+    <p class="text-redRequired text-xs mt-5">* champs obligatoires</p>
+    <div class="mt-2 grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+      @for (field of formFields; track field.name) {
+        <app-form-field
+          [control]="getControl(field.name, field.isNestedInPasswords)"
+          [parentFormGroup]="field.isNestedInPasswords ? signUpForm.get('passwords') : null"
+          [name]="field.name"
+          [label]="field.label"
+          [placeholder]="field.placeholder"
+          [type]="field.type || 'text'"
+          [isSubmitted]="isSubmitted"
+          [isRequired]="field.isRequired"
+          [minLength]="field.minLength || 2"
+          [serverErrors]="serverErrors"
+          [inputClass]="
+            'bg-white border border-gray-300 rounded-md p-3 w-full text-gray-900 text-sm leading-5 focus:ring focus:ring-blue-300 outline-none'
+          ">
+        </app-form-field>
+      }
+    </div>
+
+    <div class="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div class="space-y-4">
+        <div class="flex items-start">
+          <input
+            type="checkbox"
+            id="acceptTerms"
+            formControlName="acceptTerms"
+            class="h-4 w-4 text-mainButton border-borderInput rounded focus:ring-mainButton mt-1" />
+          <label for="acceptTerms" class="ml-3 text-sm text-text">
+            J'accepte les
+            <a href="/conditions-generales" target="_blank" class="text-textInscription hover:underline"> Conditions Générales d'Utilisation </a>
+            <span class="text-textInvalidated">*</span>
+          </label>
+        </div>
+        @if (isSubmitted && signUpForm.get('acceptTerms')?.invalid) {
+          <div class="text-textInvalidated text-sm">Vous devez accepter les conditions générales d'utilisation</div>
+        }
+
+        <div class="flex items-start">
+          <input
+            type="checkbox"
+            id="acceptPrivacy"
+            formControlName="acceptPrivacy"
+            class="h-4 w-4 text-mainButton border-borderInput rounded focus:ring-mainButton mt-1" />
+          <label for="acceptPrivacy" class="ml-3 text-sm text-text">
+            J'accepte la
+            <a href="/politique-confidentialite" target="_blank" class="text-textInscription hover:underline"> Politique de Confidentialité </a>
+            <span class="text-textInvalidated">*</span>
+          </label>
+        </div>
+        @if (isSubmitted && signUpForm.get('acceptPrivacy')?.invalid) {
+          <div class="text-textInvalidated text-sm">Vous devez accepter la politique de confidentialité</div>
+        }
+      </div>
+
+      <app-button customClass="mt-0 w-full sm:w-64 sm:w-64 pb-2 " name="Démarrer" type="submit"> </app-button>
+    </div>
+  </div>
+</form>

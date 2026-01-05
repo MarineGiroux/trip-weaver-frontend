@@ -1,0 +1,25 @@
+<button
+  [type]="type"
+  [id]="name"
+  [name]="name"
+  [ngClass]="[
+    'blue-button',
+    'w-full',
+    'px-6',
+    'py-2',
+    'text-base',
+    'font-medium',
+    'rounded-md',
+    'transition-shadow',
+    'hover:shadow-md',
+    'flex',
+    'items-center',
+    'justify-center',
+    'gap-2',
+    size,
+  ]">
+  @if (icon) {
+    <i [class]="icon"></i>
+  }
+  {{ name }}
+</button>

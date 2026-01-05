@@ -1,0 +1,345 @@
+@if (mode === 'create') {
+  <app-sky-blue-button
+    (click)="showDialog()"
+    customClass="sm:justify-start px-6"
+    type="submit"
+    name="Nouveau"
+    icon="pi pi-plus"
+    [attr.aria-label]="'Créer un nouvel élément'">
+  </app-sky-blue-button>
+} @else {
+  <p-button
+    (click)="showDialog()"
+    class="button-edit"
+    icon="pi pi-file-edit"
+    severity="success"
+    [attr.aria-label]="'Modifier l\'élément sélectionné'">
+  </p-button>
+}
+
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [dismissableMask]="true"
+  (onHide)="onDialogHide()"
+  maskStyleClass="backdrop-blur-sm"
+  styleClass="!border-0 !bg-backGround responsive-dialog"
+  role="dialog"
+  [attr.aria-labelledby]="'dialog-title'"
+  [attr.aria-describedby]="'dialog-content'">
+  <ng-template #header>
+    <header>
+      <h2 id="dialog-title" class="text-text font-medium text-xl">
+        @if (mode === 'edit' || mode === 'view') {
+          {{ item | displayFields: firstTitle : secondTitle : separator }}
+        } @else {
+          {{ 'Nouvel élément' }}
+        }
+      </h2>
+    </header>
+  </ng-template>
+
+  <ng-template #content>
+    <main id="dialog-content" class="px-6 py-6">
+      @if (mode === 'edit' || mode === 'create') {
+        <p class="text-redRequired text-xs mb-2">* champs obligatoires</p>
+      }
+      <form
+        (ngSubmit)="save()"
+        [formGroup]="editForm"
+        class="dynamic-form"
+        [ngClass]="{ 'readonly-mode': isReadOnly, 'text-sm': mode === 'view' }"
+        [attr.aria-label]="mode === 'create' ? 'Formulaire de création' : mode === 'edit' ? 'Formulaire de modification' : 'Affichage des détails'">
+        <fieldset class="p-fluid form-fields-container">
+          <legend class="sr-only">
+            @if (mode === 'create') {
+              Informations du nouvel élément
+            } @else if (mode === 'edit') {
+              Modification des informations
+            } @else {
+              Détails de l'élément
+            }
+          </legend>
+
+          @for (fieldConfig of formUpdate; track $index) {
+            <section class="form-field-wrapper" [attr.aria-labelledby]="'label-' + fieldConfig.field">
+              <article class="p-field field-container">
+                @if (mode === 'view') {
+                  <label [id]="'label-' + fieldConfig.field" [for]="fieldConfig.field" class="text-label font-medium underline text-base">
+                    {{ fieldConfig.label }} :
+                  </label>
+                } @else {
+                  <label [id]="'label-' + fieldConfig.field" [for]="fieldConfig.field" class="text-label font-medium">
+                    {{ fieldConfig.label }}
+                    @if (fieldConfig.required) {
+                      <span class="sr-only">(obligatoire)</span>
+                      <span aria-hidden="true" class="text-redRequired">*</span>
+                    }
+                  </label>
+                }
+
+                @switch (fieldConfig.type) {
+                  @case ('textarea') {
+                    <textarea
+                      [id]="fieldConfig.field"
+                      [formControlName]="fieldConfig.field"
+                      [ngClass]="{ 'text-sm': mode === 'view' }"
+                      [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                      [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                      [attr.aria-required]="fieldConfig.required"
+                      class="bg-backGroundInput border border-borderInput rounded-md py-1 px-2 h-8 focus:ring focus:ring-blue-200 outline-none text-textInput read-only"
+                      [class.border-red-500]="isFieldInvalid(fieldConfig.field)">
+                    </textarea>
+                  }
+
+                  @case ('file') {
+                    <input
+                      [id]="fieldConfig.field"
+                      [formControlName]="fieldConfig.field"
+                      type="file"
+                      [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                      [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                      [attr.aria-required]="fieldConfig.required"
+                      class="bg-backGroundInput border border-borderInput rounded-md py-1 px-2 h-8 focus:ring focus:ring-blue-200 outline-none text-textInput read-only"
+                      [class.border-red-500]="isFieldInvalid(fieldConfig.field)" />
+                  }
+
+                  @case ('file-multiple') {
+                    <input
+                      [id]="fieldConfig.field"
+                      [formControlName]="fieldConfig.field"
+                      type="file"
+                      multiple
+                      [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                      [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                      [attr.aria-required]="fieldConfig.required"
+                      [attr.aria-label]="'Sélectionner plusieurs fichiers pour ' + fieldConfig.label"
+                      class="bg-backGroundInput border border-borderInput rounded-md py-1 px-2 h-8 focus:ring focus:ring-blue-200 outline-none text-textInput read-only"
+                      [class.border-red-500]="isFieldInvalid(fieldConfig.field)" />
+                  }
+
+                  @case ('checkbox') {
+                    @if (isReadOnly) {
+                      <output
+                        class="readonly-value flex items-center"
+                        [attr.aria-label]="fieldConfig.label + ': ' + (editForm.get(fieldConfig.field)?.value ? 'Oui' : 'Non')">
+                        @if (editForm.get(fieldConfig.field)?.value) {
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-900">
+                            <i class="pi pi-check text-xs mr-1" aria-hidden="true"></i>
+                            Oui
+                          </span>
+                        } @else {
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <i class="pi pi-times text-xs mr-1" aria-hidden="true"></i>
+                            Non
+                          </span>
+                        }
+                      </output>
+                    } @else {
+                      <input
+                        [id]="fieldConfig.field"
+                        [formControlName]="fieldConfig.field"
+                        type="checkbox"
+                        [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                        [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                        [attr.aria-required]="fieldConfig.required"
+                        class="bg-backGroundInput border border-borderInput rounded-md h-4 focus:ring focus:ring-blue-200 read-only"
+                        [class.border-red-500]="isFieldInvalid(fieldConfig.field)" />
+                    }
+                  }
+
+                  @case ('multiselect') {
+                    @if (mode === 'view') {
+                      <output
+                        class="text-sm text-textMultiselect leading-relaxed"
+                        [attr.aria-label]="fieldConfig.label + ': ' + getSelectedLabels(fieldConfig.field, fieldConfig.options).join(', ')">
+                        {{ getSelectedLabels(fieldConfig.field, fieldConfig.options).join(', ') }}
+                      </output>
+                    } @else {
+                      <p-multiSelect
+                        [id]="fieldConfig.field"
+                        [formControlName]="fieldConfig.field"
+                        [options]="fieldConfig.options || []"
+                        optionLabel="label"
+                        optionValue="value"
+                        [placeholder]="'Sélectionner ' + (fieldConfig.label?.toLowerCase() || 'des éléments')"
+                        [disabled]="isReadOnly"
+                        [maxSelectedLabels]="2"
+                        [selectedItemsLabel]="'Plusieurs ' + (fieldConfig.label?.toLowerCase() || 'éléments') + ' sélectionnés'"
+                        display="comma"
+                        [class.border-red-500]="isFieldInvalid(fieldConfig.field)"
+                        [filter]="true"
+                        filterPlaceHolder="Rechercher..."
+                        [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                        [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                        [attr.aria-required]="fieldConfig.required"
+                        class="w-full bg-backGroundInput text-text">
+                      </p-multiSelect>
+                    }
+                  }
+
+                  @case ('checkbox-group') {
+                    <fieldset class="checkbox-group" [attr.aria-labelledby]="'label-' + fieldConfig.field">
+                      <legend class="sr-only">{{ fieldConfig.label }}</legend>
+                      @for (option of fieldConfig.options; track $index) {
+                        <label class="checkbox-option flex items-center gap-2 mb-2">
+                          <input
+                            [id]="fieldConfig.field + '-' + option.value"
+                            [formControlName]="fieldConfig.field"
+                            [value]="option.value"
+                            type="checkbox"
+                            [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                            [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                            class="bg-backGroundInput border border-borderInput rounded-md py-1 px-2 h-8 focus:ring focus:ring-blue-200 outline-none text-textInput read-only"
+                            [class.border-red-500]="isFieldInvalid(fieldConfig.field)" />
+                          <span>{{ option.label }}</span>
+                        </label>
+                      }
+                    </fieldset>
+                  }
+
+                  @case ('single-select') {
+                    @if (mode === 'view') {
+                      <output
+                        class="text-sm text-textMultiselect leading-relaxed"
+                        [attr.aria-label]="fieldConfig.label + ': ' + getSelectedLabel(fieldConfig.field, fieldConfig.options)">
+                        {{ getSelectedLabel(fieldConfig.field, fieldConfig.options) }}
+                      </output>
+                    } @else {
+                      <p-select
+                        [id]="fieldConfig.field"
+                        [formControlName]="fieldConfig.field"
+                        [options]="fieldConfig.options || []"
+                        optionLabel="label"
+                        optionValue="value"
+                        [placeholder]="'Sélectionner ' + (fieldConfig.label?.toLowerCase() || 'une option')"
+                        [disabled]="isReadOnly"
+                        [filter]="fieldConfig.options && fieldConfig.options.length > 5"
+                        filterPlaceHolder="Rechercher..."
+                        [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                        [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                        [attr.aria-required]="fieldConfig.required"
+                        class="w-full bg-backGroundInput text-textInput md:w-56">
+                      </p-select>
+                    }
+                  }
+
+                  @case ('select') {
+                    <p-select
+                      [id]="fieldConfig.field"
+                      [formControlName]="fieldConfig.field"
+                      [options]="fieldConfig.options"
+                      optionLabel="label"
+                      [optionValue]="'value'"
+                      [placeholder]="'Sélectionner ' + fieldConfig.label?.toLowerCase()"
+                      [disabled]="isReadOnly"
+                      [filter]="true"
+                      filterPlaceHolder="Rechercher..."
+                      [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                      [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                      [attr.aria-required]="fieldConfig.required"
+                      class="w-full bg-backGroundInput text-textInput md:w-56" />
+                  }
+
+                  @case ('radio') {
+                    <fieldset class="radio-group" [attr.aria-labelledby]="'label-' + fieldConfig.field">
+                      <legend class="sr-only">{{ fieldConfig.label }}</legend>
+                      @for (option of fieldConfig.options; track option.value) {
+                        <label class="radio-option flex items-center gap-2 mb-2">
+                          <input
+                            type="radio"
+                            [id]="fieldConfig.field + '-' + option.value"
+                            [value]="option.value"
+                            [formControlName]="fieldConfig.field"
+                            [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                            [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                            [attr.aria-required]="fieldConfig.required"
+                            class="h-4 w-4 rounded-full"
+                            [class.border-red-500]="isFieldInvalid(fieldConfig.field)" />
+                          <span class="text-text">{{ option.label }}</span>
+                        </label>
+                      }
+                    </fieldset>
+                  }
+
+                  @case ('color') {
+                    <section class="color-field-container flex flex-row items-center gap-2" [attr.aria-labelledby]="'label-' + fieldConfig.field">
+                      <figure
+                        [id]="'color-picker-' + fieldConfig.field"
+                        class="iro-color-picker rounded-md flex-grow-0"
+                        [ngClass]="{ 'pointer-events-none': isReadOnly }"
+                        [attr.aria-label]="'Sélecteur de couleur pour ' + fieldConfig.label"
+                        role="img"></figure>
+                      <input [formControlName]="fieldConfig.field" type="hidden" />
+
+                      <aside class="color-preview flex-grow-0">
+                        <figure class="flex items-center gap-2">
+                          <div
+                            class="color-box"
+                            [ngClass]="{ 'color-box-large': isReadOnly }"
+                            [style.backgroundColor]="getColorValue(fieldConfig.field)"
+                            [attr.aria-label]="'Aperçu de la couleur sélectionnée: ' + getColorValue(fieldConfig.field)"
+                            role="img"></div>
+                          <aside class="color-info flex flex-col">
+                            <output
+                              class="color-hex text-sm font-mono"
+                              [attr.aria-label]="'Code couleur hexadécimal: ' + getColorValue(fieldConfig.field)">
+                              {{ getColorValue(fieldConfig.field) }}
+                            </output>
+                          </aside>
+                        </figure>
+                      </aside>
+                    </section>
+                  }
+                  @default {
+                    @if (isReadOnly) {
+                      <output
+                        class="text-sm text-textMultiselect leading-relaxed"
+                        [attr.aria-label]="fieldConfig.label + ': ' + (getNestedValue(item, fieldConfig.field) || 'Aucune valeur')">
+                        {{ getNestedValue(item, fieldConfig.field) || '' }}
+                      </output>
+                    } @else {
+                      <input
+                        [id]="fieldConfig.field"
+                        [formControlName]="fieldConfig.field"
+                        [type]="fieldConfig.type || 'text'"
+                        [class.border-red-500]="isFieldInvalid(fieldConfig.field)"
+                        [ngClass]="{ 'readonly-input': isReadOnly, 'text-sm': isReadOnly }"
+                        [attr.aria-describedby]="isFieldInvalid(fieldConfig.field) ? 'error-' + fieldConfig.field : null"
+                        [attr.aria-invalid]="isFieldInvalid(fieldConfig.field)"
+                        [attr.aria-required]="fieldConfig.required"
+                        class="bg-backGroundInput border border-borderInput rounded-md py-1 px-2 h-8 focus:ring focus:ring-blue-200 outline-none text-textInput input-field read-only" />
+                    }
+                  }
+                }
+
+                @if (isFieldInvalid(fieldConfig.field)) {
+                  <aside
+                    [id]="'error-' + fieldConfig.field"
+                    class="error-message text-redRequired text-xs mt-1"
+                    role="alert"
+                    [attr.aria-live]="'polite'">
+                    {{ getErrorMessage(fieldConfig.field) }}
+                  </aside>
+                }
+              </article>
+            </section>
+          }
+        </fieldset>
+
+        <footer class="flex justify-center mt-4">
+          @if (mode === 'view' && isReadOnly) {
+            <app-sky-blue-button (click)="toggleEditMode()" type="button" name="Modifier" [attr.aria-label]="'Passer en mode modification'">
+            </app-sky-blue-button>
+          } @else if (!isReadOnly) {
+            <app-sky-blue-button
+              type="submit"
+              name="Sauvegarder"
+              [attr.aria-label]="mode === 'create' ? 'Créer l\'élément' : 'Sauvegarder les modifications'">
+            </app-sky-blue-button>
+          }
+        </footer>
+      </form>
+    </main>
+  </ng-template>
+</p-dialog>
