@@ -1,0 +1,55 @@
+# Dépendances
+node_modules/
+npm-debug.log*
+
+# Dossiers de build et compilation
+dist/
+**/dist/
+**/out-tsc/
+.angular/
+
+# Fichiers de cache
+.nx/cache/
+.cache/
+
+# Environnements et logs
+*.log
+.env
+.env.local
+.env.production
+
+# Fichiers de test
+coverage/
+.nyc_output/
+*.spec.ts.map
+cypress/videos/
+cypress/screenshots/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Fichiers temporaires
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Documentation générée
+documentation/
+
+# Fichiers git
+.git/
+.gitignore
+
+# Fichiers de développement
+src/**/*.js.map
+src/**/*.js
+!src/**/*.spec.js
+src/**/*.css
+
+cypress/
+scripts/
+*.md

@@ -1,0 +1,42 @@
+[
+  {
+    "firstname": "John",
+    "lastname": "Doe",
+    "phone": "123-456-7890",
+    "isoxygene": true,
+    "is_regular": false,
+    "note": "Patient requires regular check-ups."
+  },
+  {
+    "firstname": "Jane",
+    "lastname": "Smith",
+    "phone": "987-654-3210",
+    "isoxygene": false,
+    "is_regular": true,
+    "note": "Allergic to penicillin."
+  },
+  {
+    "firstname": "Alice",
+    "lastname": "Johnson",
+    "phone": "555-123-4567",
+    "isoxygene": true,
+    "is_regular": true,
+    "note": "Needs assistance with mobility."
+  },
+  {
+    "firstname": "Bob",
+    "lastname": "Brown",
+    "phone": "444-987-6543",
+    "isoxygene": false,
+    "is_regular": false,
+    "note": "No known allergies."
+  },
+  {
+    "firstname": "Charlie",
+    "lastname": "Davis",
+    "phone": "333-654-7890",
+    "isoxygene": true,
+    "is_regular": true,
+    "note": "Diabetic, requires insulin."
+  }
+]

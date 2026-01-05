@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: development
+    ports:
+      - "4200:80"
+    container_name: trip-weaver-dev
+    restart: unless-stopped
+
+  app-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: staging
+    ports:
+      - "4201:80"
+    container_name: trip-weaver-staging
+    restart: unless-stopped
+
+  app-production:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: production
+    ports:
+      - "4202:80"
+    container_name: trip-weaver-production
+    restart: unless-stopped

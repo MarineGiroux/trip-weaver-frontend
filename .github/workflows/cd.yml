@@ -1,0 +1,224 @@
+name: CD - Continuous Deployment
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - staging
+      - production
+  workflow_dispatch:  # Permet de déclencher manuellement
+    inputs:
+      environment:
+        description: 'Environnement à déployer'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  build-and-push:
+    name: 🛠️ Build & Push Docker image
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+
+    outputs:
+      tag: ${{ steps.set_tag.outputs.tag }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: 🏷️ Set Docker image tag
+        id: set_tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "tag=${{ github.event.inputs.environment }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.base_ref }}" == "production" ]]; then
+            echo "tag=production" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.base_ref }}" == "staging" ]]; then
+            echo "tag=staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "❌ Branche non supportée: ${{ github.base_ref }}"
+            exit 1
+          fi
+
+      - name: 🛠️ Build and Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            BUILD_ENV=${{ steps.set_tag.outputs.tag }}
+          push: true
+          no-cache: true  # 🔧 Force rebuild sans cache
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/trip-weaver:${{ steps.set_tag.outputs.tag }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/trip-weaver:${{ steps.set_tag.outputs.tag }}-${{ github.sha }}
+
+  deploy:
+    name: 🚀 Deploy to VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔑 Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          # Débogage - vérifier que la clé a été créée
+          echo "=== Vérification du fichier SSH ==="
+          ls -la ~/.ssh/
+          echo "=== Taille du fichier ==="
+          wc -c ~/.ssh/id_ed25519
+          echo "=== Premières lignes de la clé ==="
+          head -2 ~/.ssh/id_ed25519
+          echo "=== Dernières lignes de la clé ==="
+          tail -2 ~/.ssh/id_ed25519
+
+      - name: 🚀 SSH to VPS and deploy
+        run: |
+          TAG=${{ needs.build-and-push.outputs.tag }}
+          VPS_USER="${{ secrets.VPS_USER }}"
+          VPS_HOST="${{ secrets.VPS_HOST }}"
+          SSH_KEY="$HOME/.ssh/id_ed25519"
+          
+          if [[ "$TAG" == "production" ]]; then
+            VPS_PATH="~/tripWeaver/tripWeaver_prod/frontend"
+            CONTAINER_NAME="trip-weaver-production"
+            TRAEFIK_HOST="tripweaver.yacine-mennaa.fr"
+          else
+            VPS_PATH="~/tripWeaver/tripWeaver_staging/frontend"
+            CONTAINER_NAME="trip-weaver-staging"
+            TRAEFIK_HOST="staging-tripweaver.yacine-mennaa.fr"
+          fi
+
+          ssh -o StrictHostKeyChecking=no -i $SSH_KEY $VPS_USER@$VPS_HOST << EOF
+            echo "🚀 Déploiement de trip-weaver en environnement $TAG"
+          
+            # Créer les répertoires si nécessaire
+            mkdir -p $VPS_PATH/logs
+            mkdir -p $VPS_PATH/config
+          
+            # Se déplacer dans le répertoire de déploiement
+            cd $VPS_PATH
+            
+            # Arrêter et supprimer le conteneur existant
+            echo "🔄 Arrêt du conteneur existant..."
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+
+            # Nettoyer UNIQUEMENT les images trip-weaver (plus sécurisé)
+            echo "🧹 Nettoyage ciblé des images trip-weaver..."
+            docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/trip-weaver:$TAG || true
+            # Nettoyer seulement les images trip-weaver non utilisées
+            docker images --format "table {{.Repository}}:{{.Tag}}\t{{.ID}}" | grep "trip-weaver" | grep "<none>" | awk '{print $2}' | xargs -r docker rmi || true
+            # Nettoyer seulement le cache de build pour cette image
+            docker builder prune --filter label=stage=build -f || true
+            
+            # Récupérer la nouvelle image fraîche
+            echo "📦 Récupération de l'image Docker fraîche..."
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/trip-weaver:$TAG
+          
+            # Démarrer le nouveau conteneur avec Traefik labels
+            echo "🚀 Démarrage du nouveau conteneur avec Traefik..."
+            docker run -d \\
+              --name $CONTAINER_NAME \\
+              --network traefik \\
+              --restart unless-stopped \\
+              --label "traefik.enable=true" \\
+              --label "traefik.http.routers.$CONTAINER_NAME.rule=Host(\\\`$TRAEFIK_HOST\\\`)" \\
+              --label "traefik.http.routers.$CONTAINER_NAME.entrypoints=websecure" \\
+              --label "traefik.http.routers.$CONTAINER_NAME.tls.certresolver=letsencrypt" \\
+              --label "traefik.http.services.$CONTAINER_NAME.loadbalancer.server.port=80" \\
+              ${{ secrets.DOCKER_HUB_USERNAME }}/trip-weaver:$TAG
+            
+            # Vérifier que le conteneur est démarré
+            echo "🔍 Vérification du conteneur..."
+            sleep 5
+            docker ps | grep $CONTAINER_NAME
+          
+            # 🎯 VÉRIFIER QUELLE URL EST UTILISÉE (comme on a fait localement)
+            echo "🔍 Vérification de l'URL d'API utilisée dans le conteneur:"
+            docker exec $CONTAINER_NAME sh -c "grep -o 'localhost:8080\\|staging-tripweaver-api\\|tripweaver-api' /usr/share/nginx/html/main.js | head -3"
+          
+            echo "✅ Déploiement terminé pour l'environnement $TAG"
+            echo "🌐 Application disponible sur: https://$TRAEFIK_HOST"
+          EOF
+
+      - name: 🏥 Health check
+        run: |
+          TAG=${{ needs.build-and-push.outputs.tag }}
+          VPS_HOST="${{ secrets.VPS_HOST }}"
+          
+          echo "🔍 Vérification de santé de l'application..."
+          sleep 10
+          
+          # Tentative de connexion à l'application sur le port 80
+          if curl -f -s --max-time 30 http://$VPS_HOST/ > /dev/null; then
+            echo "✅ Application accessible et fonctionnelle sur le port 80"
+          else
+            echo "⚠️ Application potentiellement indisponible, vérifiez manuellement"
+            echo "🌐 URL: http://$VPS_HOST/"
+          fi
+
+  deployment-notification:
+    name: 📢 Notification de déploiement
+    needs: [build-and-push, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: 📋 Générer le rapport de déploiement
+        run: |
+          TAG=${{ needs.build-and-push.outputs.tag }}
+          
+          if [[ "$TAG" == "production" ]]; then
+            DOMAIN="tripweaver.yacine-mennaa.fr"
+          else
+            DOMAIN="staging-tripweaver.yacine-mennaa.fr"
+          fi
+          
+          echo "📊 RAPPORT DE DÉPLOIEMENT TRIP-WEAVER"
+          echo "======================================"
+          echo "🕐 Date: $(date)"
+          echo "🌿 Branche cible: ${{ github.base_ref }}"
+          echo "🏷️ Tag: $TAG"
+          echo "📝 Commit: ${{ github.sha }}"
+          echo "👤 Auteur: ${{ github.actor }}"
+          echo "🐳 Image: ${{ secrets.DOCKER_HUB_USERNAME }}/trip-weaver:$TAG"
+          echo "🔌 Port: 80"
+          echo ""
+          
+          if [[ "${{ needs.build-and-push.result }}" == "success" && "${{ needs.deploy.result }}" == "success" ]]; then
+            echo "✅ Déploiement réussi"
+            echo "🌐 Application disponible en environnement $TAG sur le port 80"
+            echo "🎯 URL: http://${{ secrets.VPS_HOST }}/"
+            echo ""
+            echo "📦 Conteneur déployé:"
+            if [[ "$TAG" == "production" ]]; then
+              echo "   - Nom: trip-weaver-production"
+            else
+              echo "   - Nom: trip-weaver-staging"
+            fi
+            echo "   - Port: 80:80"
+            echo "   - Restart: unless-stopped"
+            echo "   - Logs: ~/tripWeaver/tripWeaver_$TAG/frontend/logs"
+          else
+            echo "❌ Déploiement échoué"
+            echo "🔍 Build: ${{ needs.build-and-push.result }}"
+            echo "🔍 Deploy: ${{ needs.deploy.result }}"
+            echo "📝 Vérifiez les logs des étapes précédentes"
+          fi
