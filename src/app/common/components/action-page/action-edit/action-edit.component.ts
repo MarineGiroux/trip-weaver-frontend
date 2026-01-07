@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, 
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { DisplayFieldsPipe } from '../pipe/display-fields.pipe';
-import { SkyBlueButtonComponent } from '../../sky-blue-button/sky-blue-button.component';
+import { SkyGreenButtonComponent } from '../../sky-green-button/sky-green-button.component';
 import { ActionDeleteItem } from '../../../../general/type/custom-type';
 import { NestedFieldConfig } from '../types/nested-field-config.type';
 import { FieldConfig } from '../types/field-config.type';
@@ -33,7 +33,7 @@ const COLOR_PICKER_CONFIG = {
 
 @Component({
   selector: 'app-action-edit',
-  imports: [Button, Dialog, ReactiveFormsModule, DisplayFieldsPipe, SkyBlueButtonComponent, NgClass, MultiSelect, Select, FormsModule],
+  imports: [Button, Dialog, ReactiveFormsModule, DisplayFieldsPipe, SkyGreenButtonComponent, NgClass, MultiSelect, Select, FormsModule],
   templateUrl: './action-edit.component.html',
   styleUrls: ['./action-edit.component.scss'],
 })

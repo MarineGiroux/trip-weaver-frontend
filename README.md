@@ -193,7 +193,7 @@ The application uses **lazy loading** to optimize performance. All routes are de
 | `/page-patient` | DirectoryComponent | ✅ AuthGuard | Patient directory management |
 | `/calendar` | CalendarPageComponent | ✅ AuthGuard | Transport calendar |
 | `/gestion-employes` | CollaboratorPageComponent | ✅ AuthGuard | Employee management |
-| `/gestion-vehicules` | VehicleComponent | ✅ AuthGuard | Vehicle management |
+| `/gestion-vehicules` | DestinationComponent | ✅ AuthGuard | Vehicle management |
 | `/transports` | TransporterPageComponent | ✅ AuthGuard | Transport management |
 | `/conditions-generales` | ConditionsGeneralesComponent | ❌ | Terms of Service |
 | `/politique-confidentialite` | PolitiqueConfidentialiteComponent | ❌ | Privacy Policy |

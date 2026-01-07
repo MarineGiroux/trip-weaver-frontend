@@ -56,13 +56,13 @@ export class MenuItemsService {
         {
           label: 'Liste des voyages',
           icon: 'pi pi-fw pi-image text-textNavbar',
-          routerLink: '/gestion-employes',
+          routerLink: '/destination',
           styleClass: 'text-textNavbar items-center px-2',
         },
         {
           label: 'Carte',
           icon: 'pi pi-fw pi-map text-textNavbar',
-          routerLink: '/gestion-vehicules',
+          routerLink: '/map',
           styleClass: 'text-textNavbar items-center px-2',
         },
       ],

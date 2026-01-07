@@ -2,12 +2,12 @@ import { Component, Input } from '@angular/core';
 import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'app-sky-blue-button',
+  selector: 'app-sky-green-button',
   imports: [NgClass],
-  templateUrl: './sky-blue-button.component.html',
-  styleUrl: './sky-blue-button.component.scss',
+  templateUrl: './sky-green-button.component.html',
+  styleUrl: './sky-green-button.component.scss',
 })
-export class SkyBlueButtonComponent {
+export class SkyGreenButtonComponent {
   @Input() name: string = '';
   @Input() type: string = 'submit';
   @Input() customClass: string = 'sm:justify-start';

@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadChildren: () => import('./common/routes/login.routes').then(m => m.routes),
   },
   {
+    path: 'destination',
+    loadChildren: () => import('./features/destination/routes/destination.routes').then(m => m.routes),
+  },
+  {
     path: 'conditions-generales',
     loadComponent: () => import('./common/pages/conditions-generales/conditions-generales.component').then(m => m.ConditionsGeneralesComponent),
   },

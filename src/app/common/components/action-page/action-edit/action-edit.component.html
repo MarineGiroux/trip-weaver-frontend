@@ -1,12 +1,12 @@
 @if (mode === 'create') {
-  <app-sky-blue-button
+  <app-sky-green-button
     (click)="showDialog()"
     customClass="sm:justify-start px-6"
     type="submit"
     name="Nouveau"
     icon="pi pi-plus"
     [attr.aria-label]="'Créer un nouvel élément'">
-  </app-sky-blue-button>
+  </app-sky-green-button>
 } @else {
   <p-button
     (click)="showDialog()"
@@ -329,14 +329,14 @@
 
         <footer class="flex justify-center mt-4">
           @if (mode === 'view' && isReadOnly) {
-            <app-sky-blue-button (click)="toggleEditMode()" type="button" name="Modifier" [attr.aria-label]="'Passer en mode modification'">
-            </app-sky-blue-button>
+            <app-sky-green-button (click)="toggleEditMode()" type="button" name="Modifier" [attr.aria-label]="'Passer en mode modification'">
+            </app-sky-green-button>
           } @else if (!isReadOnly) {
-            <app-sky-blue-button
+            <app-sky-green-button
               type="submit"
               name="Sauvegarder"
               [attr.aria-label]="mode === 'create' ? 'Créer l\'élément' : 'Sauvegarder les modifications'">
-            </app-sky-blue-button>
+            </app-sky-green-button>
           }
         </footer>
       </form>
